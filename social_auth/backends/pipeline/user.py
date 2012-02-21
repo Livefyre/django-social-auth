@@ -12,7 +12,11 @@ from social_auth.signals import socialauth_not_registered, \
 def simple_user_exists(*args, **kwargs):
     """Return True/False if a User instance exists with the given arguments.
     Arguments are directly passed to filter() manager method."""
-    return User.objects.filter(*args, **kwargs).exists()
+    try:
+        User.objects.filter(*args, **kwargs)[0]
+        return True
+    except:
+        return False
 
 
 def get_username(details, user=None, user_exists=simple_user_exists,
@@ -74,8 +78,12 @@ def create_user(backend, details, response, uid, username, user=None, *args,
         return None
 
     email = details.get('email')
+    from lfsp.config.middleware import REQUEST_VARS
+    user = User(network=REQUEST_VARS.domain_config.network, username=username)
+    user.preferences.email = email
+    user.save()
     return {
-        'user': User.objects.create_user(username=username, email=email),
+        'user': user, 
         'is_new': True
     }
 

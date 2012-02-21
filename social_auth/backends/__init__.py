@@ -20,21 +20,17 @@ from openid.extensions import sreg, ax
 from oauth2 import Consumer as OAuthConsumer, Token, Request as OAuthRequest, \
                    SignatureMethod_HMAC_SHA1
 
-from django.db import models
 from django.contrib.auth import authenticate
 from django.contrib.auth.backends import ModelBackend
 from django.utils import simplejson
 from django.utils.importlib import import_module
 
-from social_auth.utils import setting, log, model_to_ctype, ctype_to_model
+from social_auth.utils import setting, log, model_to_ctype, ctype_to_model, get_user_model
 from social_auth.store import DjangoOpenIDStore
 from social_auth.backends.exceptions import StopPipeline
 
 
-if setting('SOCIAL_AUTH_USER_MODEL'):
-    User = models.get_model(*setting('SOCIAL_AUTH_USER_MODEL').rsplit('.', 1))
-else:
-    from django.contrib.auth.models import User
+User = get_user_model()
 
 
 # OpenID configuration

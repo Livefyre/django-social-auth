@@ -12,9 +12,8 @@ def social_auth_user(backend, uid, user=None, *args, **kwargs):
     Raise ValueError if UserSocialAuth entry belongs to another user.
     """
     try:
-        social_user = UserSocialAuth.objects.select_related('user')\
-                                            .get(provider=backend.name,
-                                                 uid=uid)
+        social_user = UserSocialAuth.objects.get(provider=backend.name,
+                                                 uid=str(uid))
     except UserSocialAuth.DoesNotExist:
         social_user = None
 
@@ -32,9 +31,10 @@ def associate_user(backend, user, uid, social_user=None, *args, **kwargs):
         return None
 
     try:
-        social = UserSocialAuth.objects.create(user=user, uid=uid,
-                                               provider=backend.name)
-    except IntegrityError:
+        social = UserSocialAuth(user=user, uid=str(uid),
+                                provider=backend.name)
+        social.save()
+    except Exception:
         # Protect for possible race condition, those bastard with FTL
         # clicking capabilities, check issue #131:
         #   https://github.com/omab/django-social-auth/issues/131
